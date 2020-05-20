@@ -1,14 +1,20 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
+import DragDrop from '../views/DragDrop.vue'
 
 Vue.use(VueRouter)
 
-  const routes: Array<RouteConfig> = [
+const routes: Array<RouteConfig> = [
   {
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/dd',
+    name: 'DragDrop',
+    component: DragDrop
   },
   {
     path: '/about',
