@@ -4,8 +4,9 @@
       class="split-line-v"
       @mousedown="onMouseDown($event)"
       @mouseup="onMouseUp($event)"
-      :style="{top: `calc(${percent}% - 19px)`}"
-      v-if="split==='vertical'"
+      @dragstart="dragstart"
+      :style="{ top: `calc(${percent}% - 19px)` }"
+      v-if="split === 'vertical'"
     >
       <div class="split-line"></div>
     </div>
@@ -13,19 +14,23 @@
       class="split-line-h"
       @mousedown="onMouseDown($event)"
       @mouseup="onMouseUp($event)"
-      v-if="split==='horizontal'"
-      :style="{left: `calc(${percent}% - 19px)`}"
+      v-if="split === 'horizontal'"
+      :style="{ left: `calc(${percent}% - 19px)` }"
     >
       <div class="split-line"></div>
     </div>
 
-    <div class="split-content split-horizontal" v-if="split==='horizontal'">
-      <div class="split-part" :style="{width: `${percent}%`}"></div>
-      <div class="split-part" :style="{width: `${remainPercent}%`}"></div>
+    <div class="split-content split-horizontal" v-if="split === 'horizontal'">
+      <div class="split-part" :style="{ width: `${percent}%` }">
+        <slot name="first"></slot>
+      </div>
+      <div class="split-part" :style="{ width: `${remainPercent}%` }">
+        <slot name="second"></slot>
+      </div>
     </div>
-    <div class="split-content split-vertical" v-if="split==='vertical'">
-      <div class="split-part" :style="{height: `${percent}%`}"></div>
-      <div class="split-part" :style="{height: `${remainPercent}%`}"></div>
+    <div class="split-content split-vertical" v-if="split === 'vertical'">
+      <div class="split-part" :style="{ height: `${percent}%` }"></div>
+      <div class="split-part" :style="{ height: `${remainPercent}%` }"></div>
     </div>
     <!-- <div
       @mousedown="onMouseDown($event)"
@@ -37,14 +42,14 @@
 <script>
 export default {
   name: "split-line",
-  props: ["min", "max", "defaultPercent", "split"],
+  props: ["min", "max", "defaultPercent", "split", "splitNum"],
   data() {
     return {
       width: null,
       height: null,
       marginTB: false,
       percent: this.defaultPercent,
-      remainPercent: 100 - this.defaultPercent
+      remainPercent: 100 - this.defaultPercent,
     };
   },
   mounted() {
@@ -65,9 +70,12 @@ export default {
   watch: {
     direction(newVal) {
       console.log(newVal);
-    }
+    },
   },
   methods: {
+    dragstart() {
+      return false;
+    },
     onMouseDown(event) {
       this.startPageX = event.pageX;
       this.startPageY = event.pageY;
@@ -78,6 +86,7 @@ export default {
       document.removeEventListener("mousemove", this._onMouseMove, false);
     },
     _onMouseMove(event) {
+      event.preventDefault();
       let pageX = event.pageX;
       let pageY = event.pageY;
       console.log(pageX, pageY);
@@ -93,8 +102,18 @@ export default {
           ((currentDistance / originDistance) * this.percent).toFixed(4)
         );
         console.log(newPercent);
-        this.percent = newPercent;
-        this.remainPercent = 100 - newPercent;
+        if (newPercent > this.max || newPercent < this.min) {
+          document.removeEventListener("mousemove", this._onMouseMove, false);
+        }
+        this.percent =
+          newPercent > this.max
+            ? this.max
+            : newPercent < this.min
+            ? this.min
+            : newPercent;
+        this.remainPercent = 100 - this.percent;
+        // this.percent = newPercent;
+        // this.remainPercent = 100 - newPercent;
         this.startPageX = pageX;
       } else if (this.split === "vertical") {
         let moveDistance = pageY - this.startPageY;
@@ -107,15 +126,23 @@ export default {
           ((currentDistance / originDistance) * this.percent).toFixed(4)
         );
         console.log(newPercent);
-        this.percent = newPercent;
-        this.remainPercent = 100 - newPercent;
+        if (newPercent > this.max || newPercent < this.min) {
+          document.removeEventListener("mousemove", this._onMouseMove, false);
+        }
+        this.percent =
+          newPercent > this.max
+            ? this.max
+            : newPercent < this.min
+            ? this.min
+            : newPercent;
+        this.remainPercent = 100 - this.percent;
         this.startPageY = pageY;
         // let distance = this.distance - 20.5;
         // let percent = Number(((pageY / distance) * 100).toFixed(4));
         // console.log(percent);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>
@@ -160,5 +187,3 @@ export default {
   display: flex;
 }
 </style>
-
-

@@ -4,7 +4,12 @@
 
     <el-container>
       <el-aside width="230px">
-        <split-pane :defaultPercent="50" :min="20" :max="80" :split="'vertical'"></split-pane>
+        <split-pane
+          :defaultPercent="50"
+          :min="20"
+          :max="80"
+          :split="'vertical'"
+        ></split-pane>
         <!-- <el-container class="aside-item aside-top"></el-container>
         <el-divider
           class="aside-divider"
@@ -16,11 +21,26 @@
         <el-container class="aside-item aside-bottom"></el-container>-->
       </el-aside>
       <el-container>
-        <el-main @drop="drop" @dragover.prevent="dragOver($event)">
-          <split-pane :defaultPercent="50" :min="20" :max="80" :split="'horizontal'"></split-pane>
-        </el-main>
+        <el-main @drop="drop" @dragover.prevent="dragOver($event)"> </el-main>
         <el-footer>Footer</el-footer>
       </el-container>
+      <el-aside width="230px">
+        <split-pane
+          :defaultPercent="50"
+          :min="20"
+          :max="80"
+          :split="'vertical'"
+        ></split-pane>
+        <!-- <el-container class="aside-item aside-top"></el-container>
+        <el-divider
+          class="aside-divider"
+          draggable="true"
+          @mousedown="onMouseDown($event)"
+          @drag="drag($event)"
+          @dragend="dragEnd($event)"
+        ></el-divider>
+        <el-container class="aside-item aside-bottom"></el-container>-->
+      </el-aside>
     </el-container>
   </el-container>
 </template>
@@ -52,8 +72,8 @@ export default {
     dragOver(event) {
       event.preventDefault();
       console.log(1);
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -88,6 +108,7 @@ export default {
   color: #333;
   text-align: center;
   height: calc(100% - 76px);
+  padding: 0;
 }
 
 .el-container {
