@@ -19,14 +19,15 @@
         <el-main>
           <!-- <split-pane :defaultPercent="50" :min="20" :max="80" :split="'horizontal'"></split-pane> -->
           <div class="main-container">
-            <div
+            <editor-container></editor-container>
+            <!-- <div
               style="width: 100%; height: 100%;"
               @drop="drop"
               @dragover="allowDrop"
               @drag="mouseMove"
               @mousedown="moudeDown"
               class="editor-container"
-            ></div>
+            ></div> -->
           </div>
         </el-main>
         <el-footer>Footer</el-footer>
@@ -57,17 +58,18 @@
 
 <script>
 import SplitPane from "@/components/SplitPane.vue";
+import EditorContainer from "@/components/EditorContainer.vue";
 export default {
   name: "Home",
-  components: { SplitPane },
+  components: { SplitPane, EditorContainer },
   data() {
     return {
       originPos: {
         deltaX: 0,
-        deltaY: 0
+        deltaY: 0,
       },
       positions: [],
-      idIndex: 0
+      idIndex: 0,
     };
   },
   mounted() {
@@ -83,14 +85,14 @@ export default {
       let deltaY = event.pageY - rect.top;
       this.originPos = {
         deltaX,
-        deltaY
+        deltaY,
       };
       this.target = target.cloneNode(true);
-      this.target.addEventListener("dragstart", e => {
+      this.target.addEventListener("dragstart", (e) => {
         console.log(e);
         this.target = e.target;
       });
-      this.target.addEventListener("drop", e => {
+      this.target.addEventListener("drop", (e) => {
         e.preventDefault();
         e.stopPropagation();
       });
@@ -111,12 +113,12 @@ export default {
       // console.log(e.pageX, e.pageY);
       let left = e.pageX - this.originPos.deltaX;
       let top = e.pageY - this.originPos.deltaY;
-      let sameLeft = this.positions.filter(pos => {
+      let sameLeft = this.positions.filter((pos) => {
         return pos.id !== id && pos.left === left;
       });
       if (sameLeft.length) {
         console.log(sameLeft);
-        let tops = sameLeft.map(sl => {
+        let tops = sameLeft.map((sl) => {
           return sl.top;
         });
         let min = Math.min(top, ...[tops]);
@@ -163,7 +165,7 @@ export default {
           left,
           top,
           width: this.target.clientWidth,
-          height: this.target.clientHeight
+          height: this.target.clientHeight,
         });
         console.log(this.posDic);
       }, 0);
@@ -229,17 +231,18 @@ export default {
 
 .el-main {
   padding: 0;
+  overflow: hidden;
 }
 
 .main-container {
   width: 100%;
   height: 100%;
-  background: #999999;
+  /* background: #999999;
   background-image: linear-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 0),
     linear-gradient(90deg, rgba(255, 255, 255, 0.3) 1px, transparent 0),
     linear-gradient(white 1px, transparent 0),
     linear-gradient(90deg, white 1px, transparent 0);
-  background-size: 15px 15px, 15px 15px, 75px 75px, 75px 75px;
+  background-size: 15px 15px, 15px 15px, 75px 75px, 75px 75px; */
 }
 
 /* background-image: linear-gradient(90deg, rgba(50, 0, 0, 0.05) 3%, rgba(0, 0, 0, 0) 3%), linear-gradient(360deg,rgba(50, 0, 0, 0.05) 3%, rgba(0, 0, 0, 0) 3%);
