@@ -33,14 +33,17 @@
         <el-footer>Footer</el-footer>
       </el-container>
       <el-aside width="230px">
-        <div>
-          <div
-            :draggable="true"
-            @drag="mouseMove"
-            @dragstart="dragStart"
-            style="width: 50px; height: 50px; background: red;"
-          ></div>
+        <div
+          v-for="(item, index) in components"
+          :key="index"
+          @mousedown="onMouseDown($event, item)"
+          style="height: 80px; width: 100%; line-height: 80px;"
+        >
+          <div style="width: 80px; height: 80px; background: red;">
+            {{ item.title }}
+          </div>
         </div>
+
         <!-- <split-pane :defaultPercent="50" :min="20" :max="80" :split="'vertical'"></split-pane> -->
         <!-- <el-container class="aside-item aside-top"></el-container>
         <el-divider
@@ -57,123 +60,194 @@
 </template>
 
 <script>
+import components from "@/editor-components";
 import SplitPane from "@/components/SplitPane.vue";
 import EditorContainer from "@/components/EditorContainer.vue";
+import { registerComponent } from "@/utils/registerComponents";
 export default {
   name: "Home",
   components: { SplitPane, EditorContainer },
+  props: ["editorArea"],
   data() {
     return {
-      originPos: {
-        deltaX: 0,
-        deltaY: 0,
-      },
-      positions: [],
       idIndex: 0,
+      components,
     };
   },
   mounted() {
     // document.addEventListener("mousemove", this.mouseMove, true);
   },
   methods: {
-    dragStart(event) {
-      // let target = event.target.cloneNode(true);
-      let target = event.target;
-      let rect = target.getBoundingClientRect();
-      console.log(rect);
-      let deltaX = event.pageX - rect.left;
-      let deltaY = event.pageY - rect.top;
-      this.originPos = {
-        deltaX,
-        deltaY,
-      };
+    onMouseDown(ev, item) {
+      this.toMountItem = item;
+      console.log(item);
+      let target = ev.target;
+      console.log(ev);
+      let { clientX, clientY } = ev;
+      console.log(clientX, clientY);
       this.target = target.cloneNode(true);
-      this.target.addEventListener("dragstart", (e) => {
-        console.log(e);
-        this.target = e.target;
-      });
-      this.target.addEventListener("drop", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      });
+      this.target.style.position = "absolute";
+      this.target.style.left = `${clientX}px`;
+      this.target.style.top = `${clientY}px`;
+      document.body.append(this.target);
+      document.addEventListener("mouseup", this.mouseUp, false);
+      document.addEventListener("mousemove", this.mouseMove, false);
     },
-    moudeDown(event) {
-      let target = event.target;
-      // target.addEventListener("mousemove", this.mouseMove, true);
-      // target.addEventListener("mouseup", this.mouseUp, true);
-    },
-    mouseUp(event) {
-      let target = event.target;
-      target.removeEventListener("mousemove", this.mouseMove, true);
-      target.removeEventListener("mouseup", this.mouseUp, true);
-    },
-    mouseMove(e) {
-      let target = e.target;
-      let id = target.getAttribute("id");
-      // console.log(e.pageX, e.pageY);
-      let left = e.pageX - this.originPos.deltaX;
-      let top = e.pageY - this.originPos.deltaY;
-      let sameLeft = this.positions.filter((pos) => {
-        return pos.id !== id && pos.left === left;
-      });
-      if (sameLeft.length) {
-        console.log(sameLeft);
-        let tops = sameLeft.map((sl) => {
-          return sl.top;
-        });
-        let min = Math.min(top, ...[tops]);
-        let max = Math.max(top, ...[tops]);
-        let div = document.createElement("div");
-        div.style.borderLeft = "1px dashed red";
-        div.style.height = `${max - min}px`;
-        div.style.position = "absolute";
-        div.style.left = `${left}px`;
-        div.style.top = `${min}px`;
-        div.classList.add("guide-line");
-        document.body.append(div);
-      } else {
-        let divs = document.querySelectorAll(".guide-line");
-        if (divs.length) {
-          document.body.removeChild(divs[0]);
-        }
-      }
-    },
-    allowDrop(event) {
-      event.preventDefault();
-    },
-    dragEnter(event) {
-      console.log(event);
-    },
-    drop(event) {
-      setTimeout(() => {
-        console.log(event.pageX, event.pageY);
-        let left = event.pageX - this.originPos.deltaX;
-        let top = event.pageY - this.originPos.deltaY;
-        this.target.style.position = "absolute";
-        this.target.style.left = `${left}px`;
-        this.target.style.top = `${top}px`;
 
-        let dropTarget = event.target;
-        let id = this.target.getAttribute("id");
-        if (!id) {
-          id = ++this.idIndex;
-          this.target.setAttribute("id", id);
-        }
-        dropTarget.append(this.target);
-        this.positions.push({
-          id,
-          left,
-          top,
-          width: this.target.clientWidth,
-          height: this.target.clientHeight,
-        });
-        console.log(this.posDic);
-      }, 0);
+    // dragStart(event) {
+    //   // let target = event.target.cloneNode(true);
+    //   let target = event.target;
+    //   let rect = target.getBoundingClientRect();
+    //   console.log(rect);
+    //   let deltaX = event.pageX - rect.left;
+    //   let deltaY = event.pageY - rect.top;
+    //   this.originPos = {
+    //     deltaX,
+    //     deltaY,
+    //   };
+    //   this.target = target.cloneNode(true);
+    //   this.target.addEventListener("dragstart", (e) => {
+    //     console.log(e);
+    //     this.target = e.target;
+    //   });
+    //   this.target.addEventListener("drop", (e) => {
+    //     e.preventDefault();
+    //     e.stopPropagation();
+    //   });
+    // },
+
+    mouseUp(event) {
+      let { clientX, clientY } = event;
+      let newTarget = this.target.cloneNode(true);
+      let editorAreaSelector = this.editorArea || ".editor-area-inner";
+      let editorArea = document.querySelector(editorAreaSelector);
+      let { x, y } = editorArea.getBoundingClientRect();
+      let left = clientX - x;
+      left = left < 0 ? 0 : left;
+      let top = clientY - y;
+      top = top < 0 ? 0 : top;
+      newTarget.style.left = `${left}px`;
+      newTarget.style.top = `${top}px`;
+      let compEl = registerComponent(this.toMountItem, 1);
+      compEl.$el.style.position = "absolute";
+      compEl.$el.style.left = `${left}px`;
+      compEl.$el.style.top = `${top}px`;
+      compEl.$el.addEventListener("mousedown", this.compMouseDown, false);
+      // editorArea.append(newTarget);
+      document.body.removeChild(this.target);
+      document.removeEventListener("mouseup", this.mouseUp, false);
+      document.removeEventListener("mousemove", this.mouseMove, false);
     },
-    dragOver(event) {
-      event.preventDefault();
-      console.log(1);
+    compMouseDown(ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      let target = ev.target;
+      let { x, y } = target.getBoundingClientRect();
+      let { clientX, clientY } = ev;
+      document.addEventListener("mousemove", this.compMouseMove, false);
+      this.deltaData = {
+        deltaX: clientX,
+        deltaY: clientY,
+      };
+      this.comp = target;
+      document.addEventListener("mouseup", this.compMouseUp, false);
     },
+    compMouseUp(ev) {
+      document.removeEventListener("mouseup", this.compMouseUp, false);
+      document.removeEventListener("mousemove", this.compMouseMove, false);
+    },
+    compMouseMove(ev) {
+      let deltaData = this.deltaData;
+      let element = this.comp;
+      let { clientX, clientY } = ev;
+      console.log(clientY, clientX);
+      let editorAreaSelector = this.editorArea || ".editor-area-inner";
+      let editorArea = document.querySelector(editorAreaSelector);
+      let {
+        x: editorAreaX,
+        y: editorAreaY,
+      } = editorArea.getBoundingClientRect();
+      let { x, y } = element.getBoundingClientRect();
+      this.deltaData = {
+        deltaX: clientX,
+        deltaY: clientY,
+      };
+      element.style.left = `${clientX - deltaData.deltaX + x - editorAreaX}px`;
+      element.style.top = `${clientY - deltaData.deltaY + y - editorAreaY}px`;
+    },
+    mouseMove(ev) {
+      let { clientX, clientY } = ev;
+      console.log(clientX, clientY);
+      this.target.style.left = `${clientX}px`;
+      this.target.style.top = `${clientY}px`;
+    },
+    // mouseMove1(e) {
+    //   let target = e.target;
+    //   let id = target.getAttribute("id");
+    //   // console.log(e.pageX, e.pageY);
+    //   let left = e.pageX - this.originPos.deltaX;
+    //   let top = e.pageY - this.originPos.deltaY;
+    //   let sameLeft = this.positions.filter((pos) => {
+    //     return pos.id !== id && pos.left === left;
+    //   });
+    //   if (sameLeft.length) {
+    //     console.log(sameLeft);
+    //     let tops = sameLeft.map((sl) => {
+    //       return sl.top;
+    //     });
+    //     let min = Math.min(top, ...[tops]);
+    //     let max = Math.max(top, ...[tops]);
+    //     let div = document.createElement("div");
+    //     div.style.borderLeft = "1px dashed red";
+    //     div.style.height = `${max - min}px`;
+    //     div.style.position = "absolute";
+    //     div.style.left = `${left}px`;
+    //     div.style.top = `${min}px`;
+    //     div.classList.add("guide-line");
+    //     document.body.append(div);
+    //   } else {
+    //     let divs = document.querySelectorAll(".guide-line");
+    //     if (divs.length) {
+    //       document.body.removeChild(divs[0]);
+    //     }
+    //   }
+    // },
+    // allowDrop(event) {
+    //   event.preventDefault();
+    // },
+    // dragEnter(event) {
+    //   console.log(event);
+    // },
+    // drop(event) {
+    //   setTimeout(() => {
+    //     console.log(event.pageX, event.pageY);
+    //     let left = event.pageX - this.originPos.deltaX;
+    //     let top = event.pageY - this.originPos.deltaY;
+    //     this.target.style.position = "absolute";
+    //     this.target.style.left = `${left}px`;
+    //     this.target.style.top = `${top}px`;
+
+    //     let dropTarget = event.target;
+    //     let id = this.target.getAttribute("id");
+    //     if (!id) {
+    //       id = ++this.idIndex;
+    //       this.target.setAttribute("id", id);
+    //     }
+    //     dropTarget.append(this.target);
+    //     this.positions.push({
+    //       id,
+    //       left,
+    //       top,
+    //       width: this.target.clientWidth,
+    //       height: this.target.clientHeight,
+    //     });
+    //     console.log(this.posDic);
+    //   }, 0);
+    // },
+    // dragOver(event) {
+    //   event.preventDefault();
+    //   console.log(1);
+    // },
   },
 };
 </script>
