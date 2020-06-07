@@ -27,7 +27,7 @@
               @drag="mouseMove"
               @mousedown="moudeDown"
               class="editor-container"
-            ></div> -->
+            ></div>-->
           </div>
         </el-main>
         <el-footer>Footer</el-footer>
@@ -39,9 +39,7 @@
           @mousedown="onMouseDown($event, item)"
           style="height: 80px; width: 100%; line-height: 80px;"
         >
-          <div style="width: 80px; height: 80px; background: red;">
-            {{ item.title }}
-          </div>
+          <div style="width: 80px; height: 80px; background: red;">{{ item.title }}</div>
         </div>
 
         <!-- <split-pane :defaultPercent="50" :min="20" :max="80" :split="'vertical'"></split-pane> -->
@@ -63,7 +61,7 @@
 import components from "@/editor-components";
 import SplitPane from "@/components/SplitPane.vue";
 import EditorContainer from "@/components/EditorContainer.vue";
-import { registerComponent } from "@/utils/registerComponents";
+import loadComp from "@/utils/loadComp";
 export default {
   name: "Home",
   components: { SplitPane, EditorContainer },
@@ -71,7 +69,7 @@ export default {
   data() {
     return {
       idIndex: 0,
-      components,
+      components
     };
   },
   mounted() {
@@ -128,11 +126,14 @@ export default {
       top = top < 0 ? 0 : top;
       newTarget.style.left = `${left}px`;
       newTarget.style.top = `${top}px`;
-      let compEl = registerComponent(this.toMountItem, 1);
-      compEl.$el.style.position = "absolute";
-      compEl.$el.style.left = `${left}px`;
-      compEl.$el.style.top = `${top}px`;
-      compEl.$el.addEventListener("mousedown", this.compMouseDown, false);
+      // let compEl = registerComponent(this.toMountItem, 1);
+      // compEl.$el.style.position = "absolute";
+      // compEl.$el.style.left = `${left}px`;
+      // compEl.$el.style.top = `${top}px`;
+      // compEl.$el.addEventListener("mousedown", this.compMouseDown, false);
+      loadComp(this.toMountItem, ".editor-area-inner", el => {
+        console.log(el);
+      });
       // editorArea.append(newTarget);
       document.body.removeChild(this.target);
       document.removeEventListener("mouseup", this.mouseUp, false);
@@ -147,7 +148,7 @@ export default {
       document.addEventListener("mousemove", this.compMouseMove, false);
       this.deltaData = {
         deltaX: clientX,
-        deltaY: clientY,
+        deltaY: clientY
       };
       this.comp = target;
       document.addEventListener("mouseup", this.compMouseUp, false);
@@ -165,12 +166,12 @@ export default {
       let editorArea = document.querySelector(editorAreaSelector);
       let {
         x: editorAreaX,
-        y: editorAreaY,
+        y: editorAreaY
       } = editorArea.getBoundingClientRect();
       let { x, y } = element.getBoundingClientRect();
       this.deltaData = {
         deltaX: clientX,
-        deltaY: clientY,
+        deltaY: clientY
       };
       element.style.left = `${clientX - deltaData.deltaX + x - editorAreaX}px`;
       element.style.top = `${clientY - deltaData.deltaY + y - editorAreaY}px`;
@@ -180,7 +181,7 @@ export default {
       console.log(clientX, clientY);
       this.target.style.left = `${clientX}px`;
       this.target.style.top = `${clientY}px`;
-    },
+    }
     // mouseMove1(e) {
     //   let target = e.target;
     //   let id = target.getAttribute("id");
@@ -248,7 +249,7 @@ export default {
     //   event.preventDefault();
     //   console.log(1);
     // },
-  },
+  }
 };
 </script>
 

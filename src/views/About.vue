@@ -12,40 +12,41 @@
 <script>
 // import { registerComponent } from "@/utils/registerComponents";
 import testData from "@/editor-components/test";
-import httpVueLoader from "http-vue-loader";
+import httpVueLoader from "@/utils/vueLoader";
 import Vue from "vue";
 import MountComponent1 from "@/components/MountComponent1.vue";
 import axios from "axios";
+import components from "@/editor-components/components";
 export default {
   components: { MountComponent1 },
   mounted() {
-    httpVueLoader.httpRequest = function(url) {
-      console.log(url);
-      // return new Promise(() => {
-      //   console.log(1);
-      // }).then(() => {
-      //   return testData;
-      // });
-      let xhr = new XMLHttpRequest();
-      xhr.open("GET", "./components/MountComponent1.txt", true);
-      xhr.send(null);
-      xhr.onload = (res) => {
-        console.log(res);
-      };
-      return axios
-        .get("./components/MountComponent1.vue")
-        .then(function(res) {
-          return res.data;
-        })
-        .catch(function(err) {
-          return Promise.reject(err.status);
-        });
-    };
+    // httpVueLoader.httpRequest = function(url) {
+    //   console.log(url);
+    //   // return new Promise(() => {
+    //   //   console.log(1);
+    //   // }).then(() => {
+    //   //   return testData;
+    //   // });
+    //   let xhr = new XMLHttpRequest();
+    //   xhr.open("GET", "./components/MountComponent1.txt", true);
+    //   xhr.send(null);
+    //   xhr.onload = res => {
+    //     console.log(res);
+    //   };
+    //   return axios
+    //     .get("./components/MountComponent1.vue")
+    //     .then(function(res) {
+    //       return res.data;
+    //     })
+    //     .catch(function(err) {
+    //       return Promise.reject(err.status);
+    //     });
+    // };
     console.log(httpVueLoader);
     debugger;
     console.log(httpVueLoader);
-    let test = httpVueLoader("./components/MountComponent1.vue");
-    test().then((comp) => {
+    let test = httpVueLoader(components[0].content);
+    test.then(comp => {
       console.log(comp);
       const constructor = Vue.extend(comp);
       console.log(constructor);
@@ -75,7 +76,7 @@ export default {
         1,
         ".mount-area"
       );
-    },
-  },
+    }
+  }
 };
 </script>
