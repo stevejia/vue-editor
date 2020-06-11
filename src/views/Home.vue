@@ -20,6 +20,7 @@
           <!-- <split-pane :defaultPercent="50" :min="20" :max="80" :split="'horizontal'"></split-pane> -->
           <div class="main-container">
             <editor-container></editor-container>
+            <!-- <CompAxis style="left: 330px; top: 200px;"></CompAxis> -->
             <!-- <div
               style="width: 100%; height: 100%;"
               @drop="drop"
@@ -58,13 +59,17 @@
 </template>
 
 <script>
-import components from "@/editor-components";
+import CompAxis from "@/components/CompAxis/index.vue";
+
+import components from "@/editor-components/components";
 import SplitPane from "@/components/SplitPane.vue";
 import EditorContainer from "@/components/EditorContainer.vue";
 import loadComp from "@/utils/loadComp";
+import vueLoader from "@/utils/vueLoader";
+import Vue from "vue";
 export default {
   name: "Home",
-  components: { SplitPane, EditorContainer },
+  components: { SplitPane, EditorContainer, CompAxis },
   props: ["editorArea"],
   data() {
     return {
@@ -131,9 +136,33 @@ export default {
       // compEl.$el.style.left = `${left}px`;
       // compEl.$el.style.top = `${top}px`;
       // compEl.$el.addEventListener("mousedown", this.compMouseDown, false);
-      loadComp(this.toMountItem, ".editor-area-inner", el => {
-        console.log(el);
+      vueLoader(this.toMountItem.content).then(comp => {
+        console.log(comp);
+        const constructor = Vue.extend(comp);
+        console.log(constructor);
+        const instance = new constructor();
+        let mountContainer = document
+          .createRange()
+          .createContextualFragment(
+            `<div class="comp-area"><div id="mount-area"></div></div>`
+          );
+        // dom.appendChild(tempNode);
+        // let mountContainer = document.createElement("div");
+        // mountContainer.setAttribute("id", "mount-area");
+        // let containerEl = document.querySelector(container).cloneNode(true);
+        let editorEl = document.querySelector(".editor-area-inner");
+        editorEl.appendChild(mountContainer);
+        // 挂载到 ID 为 plateContainer 的DOM元素
+        instance.$mount("#mount-area");
+        instance.$el.parentNode.style.position = "absolute";
+        instance.$el.parentNode.style.left = `${left}px`;
+        instance.$el.parentNode.style.top = `${top}px`;
+        instance.$el.addEventListener("mousedown", this.compMouseDown, false);
       });
+
+      // loadComp(this.toMountItem, ".editor-area-inner", el => {
+      //   console.log(el);
+      // });
       // editorArea.append(newTarget);
       document.body.removeChild(this.target);
       document.removeEventListener("mouseup", this.mouseUp, false);
@@ -142,7 +171,8 @@ export default {
     compMouseDown(ev) {
       ev.preventDefault();
       ev.stopPropagation();
-      let target = ev.target;
+      let target = ev.target.parentNode;
+      console.log(target);
       let { x, y } = target.getBoundingClientRect();
       let { clientX, clientY } = ev;
       document.addEventListener("mousemove", this.compMouseMove, false);
@@ -151,6 +181,19 @@ export default {
         deltaY: clientY
       };
       this.comp = target;
+      let mountContainer = document
+        .createRange()
+        .createContextualFragment(`<div id="mount-area"></div>`);
+      target.appendChild(mountContainer);
+      let AxisComponent = Vue.extend(CompAxis);
+      if (this.axisVM) {
+        this.axisVM.$destroy();
+        this.axisVM.$el.remove();
+        this.axisVM = null;
+      }
+      let axisVM = new AxisComponent().$mount("#mount-area");
+      this.axisVM = axisVM;
+
       document.addEventListener("mouseup", this.compMouseUp, false);
     },
     compMouseUp(ev) {
