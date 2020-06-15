@@ -16,6 +16,7 @@
 
 <script>
 export default {
+  props: ["compData"],
   data() {
     return {
       changeRule: {
@@ -102,7 +103,7 @@ export default {
       let top = deltaY * this.currentRule.t;
       console.log("mouse move");
       let target = event.target;
-      let compEl = this.resizeTarget;
+      let compParentEl = this.resizeTarget;
       let containerEl = document.querySelector(".editor-area-inner");
       let { x: aX, y: aY } = containerEl.getBoundingClientRect();
       let {
@@ -110,12 +111,20 @@ export default {
         y: cY,
         width: cWidth,
         height: cHeight
-      } = compEl.getBoundingClientRect();
+      } = compParentEl.getBoundingClientRect();
       console.log(width, height, left, top);
-      compEl.style.left = `${left + cX - aX}px`;
-      compEl.style.top = `${top + cY - aY}px`;
-      compEl.style.width = `${width + cWidth}px`;
-      compEl.style.height = `${height + cHeight}px`;
+      //   compParentEl.style.left = `${left + cX - aX}px`;
+      //   compParentEl.style.top = `${top + cY - aY}px`;
+      let compEl = document.querySelector(
+        "#" + document.querySelector(".comp-axis").getAttribute("comp-id")
+      );
+      //   compEl.style.width = `${width + cWidth}px`;
+      //   compEl.style.height = `${height + cHeight}px`;
+      console.log(this.compData);
+      this.compData.width = width + cWidth;
+      this.compData.height = height + cHeight;
+      this.compData.top = top + cY - aY;
+      this.compData.left = left + cX - aX;
       this.originPageX = pageX;
       this.originPageY = pageY;
       console.log(target.parentNode.parentNode);
@@ -131,6 +140,9 @@ export default {
 </script>
 
 <style scoped>
+.comp-axis {
+  z-index: 0;
+}
 .axis-tick {
   position: absolute;
   width: 5px;
@@ -140,50 +152,50 @@ export default {
 }
 
 .tick-nw {
-  top: -4px;
-  left: -4px;
+  top: -5px;
+  left: -5px;
   cursor: nw-resize;
 }
 
 .tick-n {
-  top: -4px;
+  top: -5px;
   left: calc(50% - 3px);
   cursor: ns-resize;
 }
 
 .tick-ne {
-  top: -4px;
-  right: -4px;
+  top: -5px;
+  right: -5px;
   cursor: ne-resize;
 }
 
 .tick-e {
   top: calc(50% - 3px);
-  right: -4px;
+  right: -5px;
   cursor: ew-resize;
 }
 
 .tick-se {
-  bottom: -4px;
-  right: -4px;
+  bottom: -5px;
+  right: -5px;
   cursor: se-resize;
 }
 
 .tick-s {
-  bottom: -4px;
+  bottom: -5px;
   left: calc(50% - 3px);
   cursor: ns-resize;
 }
 
 .tick-sw {
-  bottom: -4px;
-  left: -4px;
+  bottom: -5px;
+  left: -5px;
   cursor: sw-resize;
 }
 
 .tick-w {
   top: calc(50% - 3px);
-  left: -4px;
+  left: -5px;
   cursor: ew-resize;
 }
 </style>

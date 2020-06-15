@@ -33,14 +33,96 @@
         </el-main>
         <el-footer>Footer</el-footer>
       </el-container>
-      <el-aside width="230px">
+      <el-aside width="285px" style>
+        <div style="width: 100%; height: 50%; box-sizing: border-box; padding: 10px;">
+          <div
+            v-for="(item, index) in components"
+            :key="index"
+            @mousedown="onMouseDown($event, item)"
+            style="height: 80px; width: 100%; line-height: 50px;"
+          >
+            <div style="width: 80px; height: 80px; background: red;">{{ item.title }}</div>
+          </div>
+        </div>
         <div
-          v-for="(item, index) in components"
-          :key="index"
-          @mousedown="onMouseDown($event, item)"
-          style="height: 80px; width: 100%; line-height: 80px;"
+          style="width: 100%; height: 50%; border-top: 1px solid blue; padding: 10px; box-sizing: border-box;"
         >
-          <div style="width: 80px; height: 80px; background: red;">{{ item.title }}</div>
+          <el-row>
+            <el-form ref="attrDataForm" :model="attrData" label-width="70px">
+              <el-col :span="12">
+                <el-form-item label="宽度">
+                  <el-input v-model="attrData.width"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="高度">
+                  <el-input v-model="attrData.height"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="横坐标">
+                  <el-input v-model="attrData.left"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="纵坐标">
+                  <el-input v-model="attrData.top"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="透明度">
+                  <el-slider v-model="attrData.opacity" :min="0" :max="1" :step="0.01"></el-slider>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label-width="0">
+                  <el-select v-model="attrData.hAlign" placeholder style="width: 100%;">
+                    <el-option label="居左" value="flex-start"></el-option>
+                    <el-option label="居中" value="center"></el-option>
+                    <el-option label="居右" value="flex-end"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label-width="0">
+                  <el-select v-model="attrData.vAlign" placeholder style="width: 100%;">
+                    <el-option label="顶部对齐" value="flex-start"></el-option>
+                    <el-option label="居中" value="center"></el-option>
+                    <el-option label="底部对齐" value="flex-end"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+
+              <el-col :span="24">
+                <el-form-item label="背景颜色">
+                  <el-input class="append-colorpicker" v-model="attrData.background">
+                    <template slot="append">
+                      <el-color-picker
+                        :predefine="predefineColors"
+                        show-alpha
+                        size="small"
+                        v-model="attrData.background"
+                      ></el-color-picker>
+                    </template>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="标题颜色">
+                  <el-input class="append-colorpicker" v-model="attrData.color">
+                    <template slot="append">
+                      <el-color-picker
+                        :predefine="predefineColors"
+                        show-alpha
+                        size="small"
+                        v-model="attrData.color"
+                      ></el-color-picker>
+                    </template>
+                  </el-input>
+                </el-form-item>
+              </el-col>
+            </el-form>
+          </el-row>
         </div>
 
         <!-- <split-pane :defaultPercent="50" :min="20" :max="80" :split="'vertical'"></split-pane> -->
@@ -67,6 +149,7 @@ import EditorContainer from "@/components/EditorContainer.vue";
 import loadComp from "@/utils/loadComp";
 import vueLoader from "@/utils/vueLoader";
 import Vue from "vue";
+import { v1 as uuidv1 } from "uuid";
 export default {
   name: "Home",
   components: { SplitPane, EditorContainer, CompAxis },
@@ -74,7 +157,28 @@ export default {
   data() {
     return {
       idIndex: 0,
-      components
+      components,
+      compData: {},
+      attrData: {
+        width: 0,
+        height: 0
+      },
+      predefineColors: [
+        "#ff4500",
+        "#ff8c00",
+        "#ffd700",
+        "#90ee90",
+        "#00ced1",
+        "#1e90ff",
+        "#c71585",
+        "rgba(255, 69, 0, 0.68)",
+        "rgb(255, 120, 0)",
+        "hsv(51, 100, 98)",
+        "hsva(120, 40, 94, 0.5)",
+        "hsl(181, 100%, 37%)",
+        "hsla(209, 100%, 56%, 0.73)",
+        "#c7158577"
+      ]
     };
   },
   mounted() {
@@ -136,16 +240,15 @@ export default {
       // compEl.$el.style.left = `${left}px`;
       // compEl.$el.style.top = `${top}px`;
       // compEl.$el.addEventListener("mousedown", this.compMouseDown, false);
-      vueLoader(this.toMountItem.content).then(comp => {
+      let cContent = this.wrapperComponent(this.toMountItem.content);
+      vueLoader(cContent).then(comp => {
         console.log(comp);
         const constructor = Vue.extend(comp);
         console.log(constructor);
         const instance = new constructor();
         let mountContainer = document
           .createRange()
-          .createContextualFragment(
-            `<div class="comp-area"><div id="mount-area"></div></div>`
-          );
+          .createContextualFragment(`<div id="mount-area"></div>`);
         // dom.appendChild(tempNode);
         // let mountContainer = document.createElement("div");
         // mountContainer.setAttribute("id", "mount-area");
@@ -155,9 +258,16 @@ export default {
         // 挂载到 ID 为 plateContainer 的DOM元素
         instance.$mount("#mount-area");
         instance.$el.parentNode.style.position = "absolute";
-        instance.$el.parentNode.style.left = `${left}px`;
-        instance.$el.parentNode.style.top = `${top}px`;
+        // instance.$el.parentNode.style.left = `${left}px`;
+        // instance.$el.parentNode.style.top = `${top}px`;
         instance.$el.addEventListener("mousedown", this.compMouseDown, false);
+        let id = "comp_" + uuidv1();
+        instance.$el.children[0].setAttribute("id", id);
+        instance.$el.children[0].classList.add("vue-component");
+        instance.$el.children[0].style.zIndex = 2;
+        instance.$data.left = left;
+        instance.$data.top = top;
+        this.compData[id] = instance;
       });
 
       // loadComp(this.toMountItem, ".editor-area-inner", el => {
@@ -167,6 +277,17 @@ export default {
       document.body.removeChild(this.target);
       document.removeEventListener("mouseup", this.mouseUp, false);
       document.removeEventListener("mousemove", this.mouseMove, false);
+    },
+    wrapperComponent(compContent) {
+      var doc = document.implementation.createHTMLDocument("");
+      doc.body.innerHTML = compContent;
+      let template = doc.querySelector("template");
+      template.innerHTML =
+        '<div class="comp-area" :style="{position: \'absolute\', left:`${left}px`, top: `${top}px`}">' +
+        template.innerHTML +
+        "</div>";
+      console.log(template);
+      return doc.body.innerHTML;
     },
     compMouseDown(ev) {
       ev.preventDefault();
@@ -193,7 +314,11 @@ export default {
       }
       let axisVM = new AxisComponent().$mount("#mount-area");
       this.axisVM = axisVM;
-
+      let compEl = event.target;
+      let compId = compEl.getAttribute("id");
+      axisVM.$el.setAttribute("comp-id", compId);
+      this.attrData = this.compData[compId].$data;
+      axisVM.$props["compData"] = this.attrData;
       document.addEventListener("mouseup", this.compMouseUp, false);
     },
     compMouseUp(ev) {
@@ -361,6 +486,10 @@ export default {
     linear-gradient(white 1px, transparent 0),
     linear-gradient(90deg, white 1px, transparent 0);
   background-size: 15px 15px, 15px 15px, 75px 75px, 75px 75px; */
+}
+
+/deep/ .append-colorpicker .el-input-group__append {
+  padding: 0;
 }
 
 /* background-image: linear-gradient(90deg, rgba(50, 0, 0, 0.05) 3%, rgba(0, 0, 0, 0) 3%), linear-gradient(360deg,rgba(50, 0, 0, 0.05) 3%, rgba(0, 0, 0, 0) 3%);

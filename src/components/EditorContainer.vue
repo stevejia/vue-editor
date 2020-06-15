@@ -9,8 +9,7 @@
         @mousedown="onMouseDown"
         @mouseup="onMouseUp"
         @mousemove="onMouseMove"
-      >
-      </div>
+      ></div>
     </div>
     <div class="editor-ruler-top">
       <div class="editor-ruler-inner" v-html="topRulerHtml"></div>
@@ -28,7 +27,7 @@ export default {
       leftRulerHtml: "",
       topRulerHtml: "",
       editorZoom: 1,
-      isMouseDown: false,
+      isMouseDown: false
     };
   },
   mounted() {
@@ -135,16 +134,18 @@ export default {
     },
     onMouseUp(el) {
       this.isMouseDown = false;
-    },
-  },
+    }
+  }
 };
 </script>
 
 <style lang="css">
 .editor-container {
   position: relative;
-  width: 1920px;
-  height: 1080px;
+  /* width: 1920px;
+  height: 1080px; */
+  width: 100%;
+  height: 100%;
 }
 
 .editor-area {
@@ -152,6 +153,7 @@ export default {
   width: 100%;
   height: 100%;
   padding: 15px 0 0 15px;
+  position: relative;
 }
 
 .editor-area-inner {
@@ -165,7 +167,10 @@ export default {
     linear-gradient(90deg, white 1px, transparent 0);
   background-size: 15px 15px, 15px 15px, 75px 75px, 75px 75px;
 }
-
+.vue-component {
+  position: relative;
+  z-index: 2;
+}
 .editor-ruler-top {
   width: 100%;
   height: 15px;
