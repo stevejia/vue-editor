@@ -49,7 +49,7 @@ export default {
       height: null,
       marginTB: false,
       percent: this.defaultPercent,
-      remainPercent: 100 - this.defaultPercent,
+      remainPercent: 100 - this.defaultPercent
     };
   },
   mounted() {
@@ -70,7 +70,7 @@ export default {
   watch: {
     direction(newVal) {
       console.log(newVal);
-    },
+    }
   },
   methods: {
     dragstart() {
@@ -81,9 +81,11 @@ export default {
       this.startPageY = event.pageY;
       console.log(this.startPageX, this.startPageY);
       document.addEventListener("mousemove", this._onMouseMove, false);
+      document.addEventListener("mouseup", this.onMouseUp, false);
     },
     onMouseUp(event) {
       document.removeEventListener("mousemove", this._onMouseMove, false);
+      document.removeEventListener("mouseup", this.onMouseUp, false);
     },
     _onMouseMove(event) {
       event.preventDefault();
@@ -103,7 +105,8 @@ export default {
         );
         console.log(newPercent);
         if (newPercent > this.max || newPercent < this.min) {
-          document.removeEventListener("mousemove", this._onMouseMove, false);
+          // document.removeEventListener("mousemove", this._onMouseMove, false);
+          return;
         }
         this.percent =
           newPercent > this.max
@@ -127,7 +130,8 @@ export default {
         );
         console.log(newPercent);
         if (newPercent > this.max || newPercent < this.min) {
-          document.removeEventListener("mousemove", this._onMouseMove, false);
+          // document.removeEventListener("mousemove", this._onMouseMove, false);
+          return;
         }
         this.percent =
           newPercent > this.max
@@ -141,8 +145,8 @@ export default {
         // let percent = Number(((pageY / distance) * 100).toFixed(4));
         // console.log(percent);
       }
-    },
-  },
+    }
+  }
 };
 </script>
 <style scoped>

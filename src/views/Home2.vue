@@ -4,7 +4,7 @@
 
     <el-container>
       <el-aside width="230px">
-        <split-pane :defaultPercent="50" :min="20" :max="80" :split="'vertical'"></split-pane>
+        <!-- <split-pane :defaultPercent="50" :min="20" :max="80" :split="'vertical'"></split-pane> -->
         <!-- <el-container class="aside-item aside-top"></el-container>
         <el-divider
           class="aside-divider"

@@ -19,6 +19,7 @@
     "online-vue-editor": "^1.1.1",
     "sass": "^1.26.8",
     "sass-loader": "^8.0.2",
+    "three": "^0.117.1",
     "uuid": "^8.1.0",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",

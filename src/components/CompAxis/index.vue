@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="comp-axis"
-    style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; border: 1px solid;"
-  >
+  <div class="comp-axis">
     <div class="axis-tick tick-nw" @mousedown="resize($event, 'nw')"></div>
     <div class="axis-tick tick-n" @mousedown="resize($event, 'n')"></div>
     <div class="axis-tick tick-ne" @mousedown="resize($event, 'ne')"></div>
@@ -11,6 +8,10 @@
     <div class="axis-tick tick-s" @mousedown="resize($event, 's')"></div>
     <div class="axis-tick tick-sw" @mousedown="resize($event, 'sw')"></div>
     <div class="axis-tick tick-w" @mousedown="resize($event, 'w')"></div>
+    <div class="axis-border axis-border-w" @mousedown="resize($event, 'w')"></div>
+    <div class="axis-border axis-border-e" @mousedown="resize($event, 'w')"></div>
+    <div class="axis-border axis-border-n" @mousedown="resize($event, 'w')"></div>
+    <div class="axis-border axis-border-s" @mousedown="resize($event, 'w')"></div>
   </div>
 </template>
 
@@ -141,14 +142,57 @@ export default {
 
 <style scoped>
 .comp-axis {
-  z-index: 0;
+  z-index: 2;
+  /* position: absolute; */
+  left: 0;
+  top: 0;
+  /* width: 100%; */
+  /* height: 100%; */
+  /* border: 1px solid blue; */
+  box-sizing: border-box;
 }
+
+.axis-border {
+  background: #409eff;
+  position: absolute;
+  z-index: 3;
+  box-sizing: border-box;
+}
+
+.axis-border-w {
+  width: 2px;
+  height: 100%;
+  left: -2px;
+  top: 0;
+}
+.axis-border-n {
+  width: 100%;
+  height: 2px;
+  top: -2px;
+  left: 0;
+}
+
+.axis-border-e {
+  width: 2px;
+  height: 100%;
+  right: -2px;
+  top: 0;
+}
+
+.axis-border-s {
+  width: 100%;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+}
+
 .axis-tick {
   position: absolute;
-  width: 5px;
-  height: 5px;
+  width: 8px;
+  height: 8px;
   border: 1px solid blue;
   background: #ffffff;
+  z-index: 4;
 }
 
 .tick-nw {
