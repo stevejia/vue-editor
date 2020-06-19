@@ -74,6 +74,11 @@
                   <el-slider v-model="attrData.opacity" :min="0" :max="1" :step="0.01"></el-slider>
                 </el-form-item>
               </el-col>
+              <el-col :span="24">
+                <el-form-item label="角度">
+                  <el-slider v-model="attrData.deg" :min="0" :max="360" :marks="marks" :step="1"></el-slider>
+                </el-form-item>
+              </el-col>
               <el-col :span="12">
                 <el-form-item label-width="0">
                   <el-select v-model="attrData.hAlign" placeholder style="width: 100%;">
@@ -177,8 +182,26 @@ export default {
         "hsva(120, 40, 94, 0.5)",
         "hsl(181, 100%, 37%)",
         "hsla(209, 100%, 56%, 0.73)",
-        "#c7158577"
-      ]
+        "#c7158577",
+        "#ffffff"
+      ],
+      marks: {
+        0: "",
+        90: "",
+        180: "",
+        270: {
+          style: {
+            color: "#1989FA"
+          },
+          label: this.$createElement("strong", "")
+        },
+        360: {
+          style: {
+            color: "#1989FA"
+          },
+          label: this.$createElement("strong", "")
+        }
+      }
     };
   },
   mounted() {
@@ -302,7 +325,7 @@ export default {
       doc.body.innerHTML = compContent;
       let template = doc.querySelector("template");
       template.innerHTML =
-        '<div class="comp-area" :style="{position: \'absolute\', left:`${left}px`, top: `${top}px`, zIndex: 3}">' +
+        '<div class="comp-area" :style="{position: \'absolute\', left:`${left}px`, top: `${top}px`, zIndex: 3, transform: `rotate(${deg}deg)`}">' +
         template.innerHTML +
         "</div>";
       console.log(template);
@@ -313,7 +336,7 @@ export default {
       ev.stopPropagation();
       let target = ev.target.parentNode;
       console.log(target);
-      let { x, y } = target.getBoundingClientRect();
+      //   let { x, y } = target.getBoundingClientRect();
       let { clientX, clientY } = ev;
       document.addEventListener("mousemove", this.compMouseMove, false);
       this.deltaData = {
@@ -335,10 +358,12 @@ export default {
       let axisVM = new AxisComponent().$mount("#mount-area");
       this.axisVM = axisVM;
       let compEl = event.target;
+      compEl.classList.add("vue-component-move");
       let compId = compEl.getAttribute("id");
       axisVM.$el.setAttribute("comp-id", compId);
       this.attrData = this.compData[compId].$data;
       this.compId = compId;
+      this.compEl = compEl;
       axisVM.$props["compData"] = this.attrData;
       document.addEventListener("mouseup", this.compMouseUp, false);
       document.addEventListener("keydown", this.compKeyDown, false);
@@ -373,6 +398,7 @@ export default {
     compMouseUp(ev) {
       document.removeEventListener("mouseup", this.compMouseUp, false);
       document.removeEventListener("mousemove", this.compMouseMove, false);
+      this.compEl.classList.remove("vue-component-move");
     },
     compMouseMove(ev) {
       let deltaData = this.deltaData;
@@ -385,13 +411,15 @@ export default {
         x: editorAreaX,
         y: editorAreaY
       } = editorArea.getBoundingClientRect();
-      let { x, y } = element.getBoundingClientRect();
+      let { left: x, top: y } = this.attrData;
       this.deltaData = {
         deltaX: clientX,
         deltaY: clientY
       };
-      this.attrData.left = clientX - deltaData.deltaX + x - editorAreaX;
-      this.attrData.top = clientY - deltaData.deltaY + y - editorAreaY;
+      this.attrData.left = clientX - deltaData.deltaX + x;
+      this.attrData.top = clientY - deltaData.deltaY + y;
+      //   this.attrData.left = clientX - deltaData.deltaX + x - editorAreaX;
+      //   this.attrData.top = clientY - deltaData.deltaY + y - editorAreaY;
       // element.style.left = `${clientX - deltaData.deltaX + x - editorAreaX}px`;
       // element.style.top = `${clientY - deltaData.deltaY + y - editorAreaY}px`;
     },
@@ -548,6 +576,7 @@ export default {
   height: 20px;
   top: -8px;
 }
+
 /* background-image: linear-gradient(90deg, rgba(50, 0, 0, 0.05) 3%, rgba(0, 0, 0, 0) 3%), linear-gradient(360deg,rgba(50, 0, 0, 0.05) 3%, rgba(0, 0, 0, 0) 3%);
     // background-size: 20px 20px;
      background-position: center center; */

@@ -170,7 +170,13 @@ export default {
 .vue-component {
   position: relative;
   z-index: 2;
+  cursor: grab;
 }
+
+.vue-component-move {
+  cursor: grabbing !important;
+}
+
 .editor-ruler-top {
   width: 100%;
   height: 15px;

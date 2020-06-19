@@ -335,6 +335,7 @@ export default {
       let axisVM = new AxisComponent().$mount("#mount-area");
       this.axisVM = axisVM;
       let compEl = event.target;
+      compEl.classList.add("vue-component-move");
       let compId = compEl.getAttribute("id");
       axisVM.$el.setAttribute("comp-id", compId);
       this.attrData = this.compData[compId].$data;
