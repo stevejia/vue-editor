@@ -194,13 +194,19 @@ export default {
 
       let halfH = clientHeight / 2;
       let halfW = clientWidth / 2;
-
+      let minX = Number.MAX_VALUE,
+        minY = Number.MAX_VALUE,
+        maxX = Number.MIN_VALUE,
+        maxY = Number.MIN_VALUE;
       //topLeft坐标
       let x0 = {
         x: centerPos.x + r * Math.sin((deltaAngle / 180) * Math.PI),
         y: centerPos.y - r * Math.cos((deltaAngle / 180) * Math.PI)
       };
-
+      minX = Math.min(minX, x0.x);
+      minY = Math.min(minY, x0.y);
+      maxX = Math.max(maxX, x0.x);
+      maxY = Math.max(maxY, x0.y);
       let x1 = {
         x: centerPos.x + halfH * Math.sin((angle / 180) * Math.PI),
         y: centerPos.y - halfH * Math.cos((angle / 180) * Math.PI)
@@ -210,7 +216,10 @@ export default {
         x: centerPos.x + r * Math.sin((delta_R_Angle / 180) * Math.PI),
         y: centerPos.y - r * Math.cos((delta_R_Angle / 180) * Math.PI)
       };
-
+      minX = Math.min(minX, x2.x);
+      minY = Math.min(minY, x2.y);
+      maxX = Math.max(maxX, x2.x);
+      maxY = Math.max(maxY, x2.y);
       let x3 = {
         x: centerPos.x + halfW * Math.cos((angle / 180) * Math.PI),
         y: centerPos.y + halfW * Math.sin((angle / 180) * Math.PI)
@@ -220,23 +229,35 @@ export default {
         x: centerPos.x - r * Math.sin((deltaAngle / 180) * Math.PI),
         y: centerPos.y + r * Math.cos((deltaAngle / 180) * Math.PI)
       };
-
+      minX = Math.min(minX, x4.x);
+      minY = Math.min(minY, x4.y);
+      maxX = Math.max(maxX, x4.x);
+      maxY = Math.max(maxY, x4.y);
       let x5 = {
         x: centerPos.x - halfH * Math.sin((angle / 180) * Math.PI),
         y: centerPos.y + halfH * Math.cos((angle / 180) * Math.PI)
       };
+
       let x6 = {
         x: centerPos.x - r * Math.sin((delta_R_Angle / 180) * Math.PI),
         y: centerPos.y + r * Math.cos((delta_R_Angle / 180) * Math.PI)
       };
-
+      minX = Math.min(minX, x6.x);
+      minY = Math.min(minY, x6.y);
+      maxX = Math.max(maxX, x6.x);
+      maxY = Math.max(maxY, x6.y);
       let x7 = {
         x: centerPos.x - halfW * Math.cos((angle / 180) * Math.PI),
         y: centerPos.y - halfW * Math.sin((angle / 180) * Math.PI)
       };
+
       let points = [x0, x1, x2, x3, x4, x5, x6, x7];
-      console.log(points);
-      return points;
+      console.log(points, minX, minY, maxX, maxY);
+      return {
+        points,
+        min: { x: minX, y: minY },
+        max: { x: maxX, y: maxY }
+      };
       // document.querySelector("#testdiv").style.left = `${x7.x}px`;
       // document.querySelector("#testdiv").style.top = `${x7.y}px`;
       // console.log(x0);
@@ -254,11 +275,16 @@ export default {
       this.currentRule = rule;
       let target = event.target.parentNode.parentNode;
       console.log(target);
-      let points = this._calcPositions(target);
+      let { points, min, max } = this._calcPositions(target);
+      this.min = min;
+      this.max = max;
       let fixedPoint = points[(index + 4) % 8];
       this.fixedPoint = fixedPoint;
+      let currentPoint = points[index];
+      this.currentPoint = currentPoint;
       console.log(fixedPoint);
       this.resizeTarget = target;
+      this.resizeIndex = index;
       console.log(rule);
       // this.backDeg = this.compData.deg;
       // this.compData.deg = 0;
@@ -282,14 +308,91 @@ export default {
       let deg = (Math.atan(Math.abs(disY) / Math.abs(disX)) / Math.PI) * 180;
       // console.log(deg);
 
-      let deltaDeg = 90 - this.compData.deg - deg;
+      let deltaDeg = this.compData.deg + deg;
       let distance = Math.sqrt(Math.pow(disX, 2) + Math.pow(disY, 2));
-      console.log(distance);
-      let newWidth = distance * Math.sin((deltaDeg / 180) * Math.PI);
-      let newHeight = distance * Math.cos((deltaDeg / 180) * Math.PI);
+      // console.log(distance);
+      let newWidth =
+        [3, 7].indexOf(this.resizeIndex) === -1
+          ? distance * Math.sin((deltaDeg / 180) * Math.PI)
+          : this.compData.width;
+      let newHeight =
+        [1, 5].indexOf(this.resizeIndex) === -1
+          ? distance * Math.cos((deltaDeg / 180) * Math.PI)
+          : this.compData.height;
       console.log(newWidth, newHeight);
-      this.compData.width = newWidth;
-      this.compData.height = newHeight;
+      // this.compData.width = newWidth;
+      // this.compData.height = newHeight;
+
+      let x1 = {
+        x:
+          this.fixedPoint.x +
+          newHeight * Math.sin((this.compData.deg / 180) * Math.PI),
+        y:
+          this.fixedPoint.y -
+          newHeight * Math.cos((this.compData.deg / 180) * Math.PI)
+      };
+
+      let x2 = {
+        x:
+          this.fixedPoint.x +
+          newWidth * Math.cos((this.compData.deg / 180) * Math.PI),
+        y:
+          this.fixedPoint.y +
+          newHeight * Math.sin((this.compData.deg / 180) * Math.PI)
+      };
+
+      let minX = Number.MAX_VALUE;
+      let minY = Number.MAX_VALUE;
+      minX = Math.min(...[this.fixedPoint.x, pageX, x1.x, x2.x]);
+      minY = Math.min(...[this.fixedPoint.y, pageY, x1.y, x2.y]);
+      console.log(minX, minY);
+      document.querySelector("#testdiv").style.left = `${this.fixedPoint.x}px`;
+      document.querySelector("#testdiv").style.top = `${this.fixedPoint.y}px`;
+      let containerEl1 = document.querySelector(".editor-area-inner");
+      let { x: aX1, y: aY1 } = containerEl1.getBoundingClientRect();
+      // this.compData.left = minX - aX1;
+      // this.compData.top = minY - aY1;
+      let a = Math.sqrt(
+        Math.pow(this.compData.width, 2) + Math.pow(this.compData.height, 2)
+      );
+      let b = Math.sqrt(
+        Math.pow(pageX - this.fixedPoint.x, 2) +
+          Math.pow(pageY - this.fixedPoint.y, 2)
+      );
+
+      let c = Math.sqrt(
+        Math.pow(pageX - this.currentPoint.x, 2) +
+          Math.pow(pageY - this.currentPoint.y, 2)
+      );
+
+      let angle_n =
+        (180 / Math.PI) * Math.acos((a * a + b * b - c * c) / (2 * a * b));
+      console.log(angle_n);
+
+      let crossMultiply =
+        this.currentPoint.x * pageY - this.currentPoint.y * pageX;
+      console.log(crossMultiply < 0 ? "逆时针" : "顺时针");
+      let angle_t =
+        (180 / Math.PI) * Math.atan(this.compData.width / this.compData.height);
+      if (crossMultiply >= 0) {
+        angle_t =
+          (180 / Math.PI) *
+          Math.atan(this.compData.height / this.compData.width);
+      }
+
+      console.log(angle_t - angle_n);
+      let angle_z = angle_t - angle_n;
+      let nw =
+        crossMultiply >= 0
+          ? b * Math.sin((angle_z / 180) * Math.PI)
+          : b * Math.cos((angle_z / 180) * Math.PI);
+      let nh =
+        crossMultiply >= 0
+          ? b * Math.cos((angle_z / 180) * Math.PI)
+          : b * Math.sin((angle_z / 180) * Math.PI);
+      console.log(nw, nh);
+      this.compData.width = nw;
+      this.compData.height = nh;
       return;
       let deltaX = pageX - this.originPageX;
       let deltaY = pageY - this.originPageY;
